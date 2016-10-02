@@ -1,81 +1,69 @@
 console.log('I got loaded');
 
-function Input(el){
+function Input(el) {
     var parent = el,
         map = {},
         intervals = {};
 
-    function ev_kdown(ev)
-    {
+    function ev_kdown(ev) {
         map[ev.key] = true;
         return;
     }
 
-    function ev_kup(ev)
-    {
+    function ev_kup(ev) {
         map[ev.key] = false;
         return;
     }
 
-    function key_down(key)
-    {
+    function key_down(key) {
         return map[key];
     }
 
-    function keys_down_array(array)
-    {
-        for(var i = 0; i < array.length; i++)
-            if(!key_down(array[i]))
+    function keys_down_array(array) {
+        for (var i = 0; i < array.length; i++)
+            if (!key_down(array[i]))
                 return false;
 
         return true;
     }
 
-    function keys_down_arguments()
-    {
+    function keys_down_arguments() {
         return keys_down_array(Array.from(arguments));
     }
 
-    function clear()
-    {
+    function clear() {
         map = {};
     }
 
-    function watch_loop(keylist, callback)
-    {
-        return function(){
-            if(keys_down_array(keylist))
+    function watch_loop(keylist, callback) {
+        return function () {
+            if (keys_down_array(keylist))
                 callback();
         }
     }
 
-    function watch(name, callback)
-    {
+    function watch(name, callback) {
         var keylist = Array.from(arguments).splice(2);
 
-        intervals[name] = setInterval(watch_loop(keylist, callback), 1000/24);
+        intervals[name] = setInterval(watch_loop(keylist, callback), 1000 / 24);
     }
 
-    function unwatch(name)
-    {
+    function unwatch(name) {
         clearInterval(intervals[name]);
         delete intervals[name];
     }
 
-    function detach()
-    {
+    function detach() {
         parent.removeEventListener("keydown", ev_kdown);
         parent.removeEventListener("keyup", ev_kup);
     }
 
-    function attach()
-    {
+    function attach() {
         parent.addEventListener("keydown", ev_kdown);
         parent.addEventListener("keyup", ev_kup);
     }
 
-    function Input()
-    {
+    function Input() {
         attach();
 
         return {
@@ -124,12 +112,12 @@ $('body').append("<input id='keyboard_click_search' style='z-index: 100; positio
 var searchBox = $("#keyboard_click_search");
 searchBox.hide();
 
-searchBox.on('keyup', function(event){
-    if (previousHighlight){
+searchBox.on('keyup', function (event) {
+    if (previousHighlight) {
         removeSearchHighlight(previousHighlight);
     }
     console.log(this.value);
-    if (this.value.length > 0 && previousHighlight !== this.value){
+    if (this.value.length > 0 && previousHighlight !== this.value) {
         searchHighlight(this.value);
         previousHighlight = this.value;
     }
@@ -137,25 +125,24 @@ searchBox.on('keyup', function(event){
 
 var previouslyFocused = null;
 
-body.watch("watch_click", function(){
+body.watch("watch_click", function () {
     console.log('K + C was hit show searchBox!');
     searchBox.show();
     previouslyFocused = $(':focus');
     searchBox.focus();
 }, "c", "k");
 
-body.watch("watch_esc", function(){
-	console.log('Esc hit hide searchBox now!');
-	if (searchBox.is(':visible')){
-		searchBox.hide();
-		if (previouslyFocused){
-			previouslyFocused.focus();
-			previouslyFocused = null;
-		}
-		if (previousHighlight) {
+body.watch("watch_esc", function () {
+    console.log('Esc hit hide searchBox now!');
+    if (searchBox.is(':visible')) {
+        searchBox.hide();
+        if (previouslyFocused) {
+            previouslyFocused.focus();
+            previouslyFocused = null;
+        }
+        if (previousHighlight) {
             removeSearchHighlight(previousHighlight);
             previousHighlight = null;
         }
-	}
+    }
 }, "Escape");
-
