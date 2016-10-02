@@ -91,12 +91,49 @@ function Input(el){
     return Input();
 }
 
+var previousHighlight = null;
+
+function searchHighlight(text) {
+    document.designMode = "on";
+    var sel = window.getSelection();
+    sel.collapse(document.body, 0);
+
+    while (window.find(text)) {
+        document.execCommand("HiliteColor", false, "yellow");
+        sel.collapseToEnd();
+    }
+    document.designMode = "off";
+}
+
+function removeSearchHighlight(text) {
+    document.designMode = "on";
+    var sel = window.getSelection();
+    sel.collapse(document.body, 0);
+
+    while (window.find(text)) {
+        document.execCommand("removeFormat", false);
+        sel.collapseToEnd();
+    }
+    document.designMode = "off";
+}
+
 var body = Input(document.getElementsByTagName("body")[0]);
 
-$('body').append("<input id='keyboard_click_search' style='z-index: 100; position: fixed; top: 0;'></input>")
+$('body').append("<input id='keyboard_click_search' style='z-index: 100; position: fixed; top: 0;'></input>");
 
 var searchBox = $("#keyboard_click_search");
 searchBox.hide();
+
+searchBox.on('keyup', function(event){
+    if (previousHighlight){
+        removeSearchHighlight(previousHighlight);
+    }
+    console.log(this.value);
+    if (this.value.length > 0 && previousHighlight !== this.value){
+        searchHighlight(this.value);
+        previousHighlight = this.value;
+    }
+});
 
 var previouslyFocused = null;
 
@@ -115,6 +152,10 @@ body.watch("watch_esc", function(){
 			previouslyFocused.focus();
 			previouslyFocused = null;
 		}
+		if (previousHighlight) {
+            removeSearchHighlight(previousHighlight);
+            previousHighlight = null;
+        }
 	}
 }, "Escape");
 
